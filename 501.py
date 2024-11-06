@@ -1,6 +1,7 @@
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns  # For enhanced visualizations like heat maps
 
 # Base class Lodging
 class Lodging:
@@ -39,7 +40,6 @@ class BeachHouse(Vacation):
     def __init__(self, date, name, rating, price, average_revenue):
         super().__init__(date, name, "BeachHouse", rating, price, average_revenue)
 
-
 # Load the .dat file (which contains pickled objects)
 with open('Lodgingpkl638250102.dat', 'rb') as file:
     objects = pickle.load(file)
@@ -58,44 +58,97 @@ data = {
 
 df = pd.DataFrame(data)
 
-# Convert the 'price' and 'average_revenue' columns to numeric (float) types
-df['price'] = pd.to_numeric(df['price'], errors='coerce')  # Converts invalid parsing to NaN
-df['average_revenue'] = pd.to_numeric(df['average_revenue'], errors='coerce')  # Converts invalid parsing to NaN
+# Convert 'date' to datetime
+df['date'] = pd.to_datetime(df['date'], errors='coerce')
 
-# Display the DataFrame to verify it loaded correctly and the conversion worked
+# Convert numerical columns to numeric types
+numerical_cols = ['price', 'average_revenue', 'rating']
+for col in numerical_cols:
+    df[col] = pd.to_numeric(df[col], errors='coerce')
+
+# Handle missing values
+## For numerical variables: fill missing values with the median
+for col in numerical_cols:
+    median_value = df[col].median()
+    df[col].fillna(median_value, inplace=True)
+
+## For categorical variables: fill missing values with the mode
+categorical_cols = ['date', 'name', 'category', 'type']
+for col in categorical_cols:
+    mode_value = df[col].mode()[0]
+    df[col].fillna(mode_value, inplace=True)
+
+# Display the DataFrame to verify it loaded correctly
 print(df.head())
 
-# Write the loaded objects to a new CSV file
-with open('lodging_data.csv', 'w') as f:
-    # Write the header
-    f.write("unique_id,date,name,category,type,rating,price,average_revenue\n")
-    # Write each object's data using its __str__ method
-    for lodging in objects:
-        f.write(str(lodging) + "\n")
-
+# Save the cleaned DataFrame to a new CSV file
+df.to_csv('lodging_data.csv', index=False)
 
 # --- Data Visualization ---
 
-# Example Visualization 1: Bar chart for Lodging Categories vs Average Revenue
-df.groupby('category')['average_revenue'].sum().plot(kind='bar', color='skyblue')
-plt.title('Total Average Revenue by Lodging Category')
-plt.xlabel('Lodging Category')
-plt.ylabel('Average Revenue (USD)')
-plt.xticks(rotation=45)
-plt.tight_layout()  # Adjusts plot to prevent label cutoff
-plt.show()
+# Setting a seaborn style for better aesthetics
+sns.set(style="whitegrid")
 
-# Example Visualization 2: Pie chart for the proportion of Lodging Types
-df['type'].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=['lightgreen', 'lightcoral'])
-plt.title('Proportion of Lodging Types (Travel vs Vacation)')
-plt.ylabel('')  # Remove y-label for aesthetics
+# 1. Bar Chart: Total Average Revenue by Lodging Category
+plt.figure(figsize=(8, 6))
+category_revenue = df.groupby('category')['average_revenue'].sum().sort_values(ascending=False)
+category_revenue.plot(kind='bar', color='skyblue')
+plt.title('Figure 1: Bar Chart - Total Average Revenue by Lodging Category')
+plt.xlabel('Lodging Category')
+plt.ylabel('Total Average Revenue (USD)')
+plt.xticks(rotation=45)
 plt.tight_layout()
 plt.show()
 
-# Example Visualization 3: Scatter plot for Price vs Average Revenue
-plt.scatter(df['price'], df['average_revenue'], color='purple')
-plt.title('Price vs Average Revenue')
+# 2. Boxplot: Distribution of Prices by Lodging Type
+plt.figure(figsize=(8, 6))
+sns.boxplot(x='type', y='price', data=df, palette='pastel')
+plt.title('Figure 2: Boxplot - Price Distribution by Lodging Type')
+plt.xlabel('Lodging Type')
+plt.ylabel('Price (USD)')
+plt.tight_layout()
+plt.show()
+
+# 3. Line Plot: Average Revenue Over Time
+plt.figure(figsize=(10, 6))
+df_sorted = df.sort_values('date')
+sns.lineplot(x='date', y='average_revenue', data=df_sorted, marker='o', color='green')
+plt.title('Figure 3: Line Plot - Average Revenue Over Time')
+plt.xlabel('Date')
+plt.ylabel('Average Revenue (USD)')
+plt.tight_layout()
+plt.show()
+
+# 4. Scatter Plot: Price vs Average Revenue
+plt.figure(figsize=(8, 6))
+plt.scatter(df['price'], df['average_revenue'], color='purple', alpha=0.7)
+plt.title('Figure 4: Scatter Plot - Price vs Average Revenue')
 plt.xlabel('Price (USD)')
 plt.ylabel('Average Revenue (USD)')
+plt.tight_layout()
+plt.show()
+
+# 5. Histogram: Distribution of Ratings
+plt.figure(figsize=(8, 6))
+df['rating'].hist(bins=10, color='orange', edgecolor='black')
+plt.title('Figure 5: Histogram - Distribution of Ratings')
+plt.xlabel('Rating')
+plt.ylabel('Frequency')
+plt.tight_layout()
+plt.show()
+
+# 6. Pie Chart: Proportion of Lodging Types
+plt.figure(figsize=(8, 6))
+df['type'].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=sns.color_palette('pastel'))
+plt.title('Figure 6: Pie Chart - Proportion of Lodging Types')
+plt.ylabel('')
+plt.tight_layout()
+plt.show()
+
+# 7. Heat Map: Correlation Matrix
+plt.figure(figsize=(8, 6))
+corr = df[numerical_cols].corr()
+sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f')
+plt.title('Figure 7: Heat Map - Correlation Matrix of Numerical Features')
 plt.tight_layout()
 plt.show()
