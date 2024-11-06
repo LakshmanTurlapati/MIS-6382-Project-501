@@ -68,5 +68,24 @@ python lodging_analysis.py
 
 Further enhancements and refinements to be made (the above code is not final.)
 
+Latest Commit:
 
+
+
+In the latest commit, we have made the following significant changes:
+
+	1.	Data Handling Enhancements:
+	•	Implemented missing value handling by filling numerical variables (price, average_revenue, rating) with their median values.
+	•	Filled missing categorical variables (date, name, category, type) with their mode values.
+	•	This ensures that our dataset is complete and reduces the potential bias that could be introduced by simply dropping missing values.
+	2.	Updated Visualizations:
+	•	Added Appropriate Labels and Titles: Each graph now includes clear titles indicating the figure number and visualization type, as well as descriptive axis labels.
+	•	Figure Numbers: Introduced figure numbers in the titles (e.g., “Figure 1: Bar Chart - Total Average Revenue by Lodging Category”) for easy reference and clarity.
+	•	Consistent Styling and Formatting: Applied consistent styling across all visualizations using seaborn for better aesthetics and readability.
+	3.	Code Refinements:
+	•	Optimized the code by utilizing pandas’ built-in functions for data handling and export (e.g., using df.to_csv() for saving the DataFrame).
+	•	Ensured that the code is modular and organized, making it easier to maintain and extend in the future.
+	4.	Updated README:
+	•	Revised the README file to reflect the latest changes, including detailed explanations of data handling methods and visualization enhancements.
+	•	Added this Latest Commit section to explicitly mention the recent updates made to the project.
 
