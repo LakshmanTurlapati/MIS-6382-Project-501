@@ -2,6 +2,7 @@ import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
 # Base class Lodging
 class Lodging:
@@ -66,6 +67,9 @@ numerical_cols = ['price', 'average_revenue', 'rating']
 for col in numerical_cols:
     df[col] = pd.to_numeric(df[col], errors='coerce')
 
+# Convert the 'rating' column to integers after ensuring it's numeric
+df['rating'] = df['rating'].fillna(0).astype(int)
+
 # Handle missing values
 ## For numerical variables: fill missing values with the median
 for col in numerical_cols:
@@ -103,11 +107,9 @@ plt.tight_layout()
 plt.savefig('BarChart.pdf')
 plt.show()
 
-
-
 # 2. Boxplot: Distribution of Prices by Lodging Type
 plt.figure(figsize=(8, 8))
-sns.boxplot(x='type', y='price', data=df, palette=['skyblue', 'dimgrey'])
+sns.boxplot(x='type', y='price', data=df, hue='type', dodge=False, palette='Set2', legend=False)
 plt.title('Figure 2: Boxplot - Price Distribution by Lodging Type')
 plt.xlabel('Lodging Type')
 plt.ylabel('Price (USD)')
@@ -120,7 +122,7 @@ plt.figure(figsize=(10, 6))
 df_sorted = df.sort_values('date')
 sns.lineplot(x='date', y='average_revenue', data=df_sorted, marker='o', color='dimgrey', markersize=3)
 plt.title('Figure 3: Line Plot - Average Revenue Over Time')
-plt.axvspan('2022-10-01', '2022-12-31', color='yellow', alpha=0.2, label='Holiday Season')
+plt.axvspan(pd.Timestamp('2022-10-01'), pd.Timestamp('2022-12-31'), color='yellow', alpha=0.2, label='Holiday Season')
 plt.xlabel('Date', fontsize=12)
 plt.ylabel('Average Revenue (USD)', fontsize=12)
 plt.tight_layout()
@@ -129,19 +131,22 @@ plt.show()
 
 # Scatter Plot: Rating vs. Price
 plt.figure(figsize=(10, 6))
-plt.scatter(df["price"], df["rating"], c='navy', alpha=0.7)
-plt.title("Rating vs. Price", fontsize=16)
-plt.xlabel("Price", fontsize=12)
+sns.scatterplot(data=df, x="price", y="rating", hue="type", palette="deep", alpha=0.7)
+plt.title("Rating vs. Price by Lodging Type", fontsize=16)
+plt.xlabel("Price (USD)", fontsize=12)
 plt.ylabel("Rating", fontsize=12)
 plt.grid(alpha=0.3)
+plt.legend(title='Lodging Type')
+plt.tight_layout()
 plt.savefig('Scatter.pdf')
 plt.show()
 
 # 5. Histogram: Distribution of Ratings
 plt.figure(figsize=(8, 6))
-df['rating'].hist(bins=[0.5, 1.5, 2.5, 3.5, 4.5, 5.5], color='navy', edgecolor='white')
+counts, edges = np.histogram(df['rating'], bins=np.arange(1, 7))  # Adjust bins as per your data
+plt.bar(edges[:-1], counts, width=1, color='navy', edgecolor='white', align='edge')
 for count, edge in zip(counts, edges[:-1]):
-    plt.text(edge + 0.5, count + 50, int(count), ha='center', va='bottom', fontsize=10)
+    plt.text(edge + 0.5, count + 1, str(count), ha='center', va='bottom')
 plt.title('Figure 5: Histogram - Distribution of Ratings')
 plt.xlabel('Rating')
 plt.ylabel('Frequency')
@@ -149,7 +154,6 @@ plt.xticks([1, 2, 3, 4, 5])  # Set ticks at the center of the bars
 plt.tight_layout()
 plt.savefig('Histogram.pdf')
 plt.show()
-
 
 # 6. Pie Chart: Proportion of Lodging Types
 plt.figure(figsize=(8, 6))
