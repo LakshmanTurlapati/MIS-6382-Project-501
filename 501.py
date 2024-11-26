@@ -1,7 +1,7 @@
 import pickle
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns  # For enhanced visualizations like heat maps
+import seaborn as sns
 
 # Base class Lodging
 class Lodging:
@@ -92,63 +92,79 @@ sns.set(style="whitegrid")
 # 1. Bar Chart: Total Average Revenue by Lodging Category
 plt.figure(figsize=(8, 6))
 category_revenue = df.groupby('category')['average_revenue'].sum().sort_values(ascending=False)
-category_revenue.plot(kind='bar', color='skyblue')
-plt.title('Figure 1: Bar Chart - Total Average Revenue by Lodging Category')
+category_revenue.plot(kind='bar', color='navy')
+for index, value in enumerate(category_revenue):
+    plt.text(index, value, str(round(value)), ha='center', va='bottom')
+plt.title('Figure 1: Total Average Revenue by Lodging Category')
 plt.xlabel('Lodging Category')
 plt.ylabel('Total Average Revenue (USD)')
-plt.xticks(rotation=45)
+plt.xticks(rotation=0)
 plt.tight_layout()
+plt.savefig('BarChart.pdf')
 plt.show()
 
+
+
 # 2. Boxplot: Distribution of Prices by Lodging Type
-plt.figure(figsize=(8, 6))
-sns.boxplot(x='type', y='price', data=df, palette='pastel')
+plt.figure(figsize=(8, 8))
+sns.boxplot(x='type', y='price', data=df, palette=['skyblue', 'dimgrey'])
 plt.title('Figure 2: Boxplot - Price Distribution by Lodging Type')
 plt.xlabel('Lodging Type')
 plt.ylabel('Price (USD)')
 plt.tight_layout()
+plt.savefig('Boxplot.pdf')
 plt.show()
 
 # 3. Line Plot: Average Revenue Over Time
 plt.figure(figsize=(10, 6))
 df_sorted = df.sort_values('date')
-sns.lineplot(x='date', y='average_revenue', data=df_sorted, marker='o', color='green')
+sns.lineplot(x='date', y='average_revenue', data=df_sorted, marker='o', color='dimgrey', markersize=3)
 plt.title('Figure 3: Line Plot - Average Revenue Over Time')
-plt.xlabel('Date')
-plt.ylabel('Average Revenue (USD)')
+plt.axvspan('2022-10-01', '2022-12-31', color='yellow', alpha=0.2, label='Holiday Season')
+plt.xlabel('Date', fontsize=12)
+plt.ylabel('Average Revenue (USD)', fontsize=12)
 plt.tight_layout()
+plt.savefig('lineplot.pdf')
 plt.show()
 
-# 4. Scatter Plot: Price vs Average Revenue
-plt.figure(figsize=(8, 6))
-plt.scatter(df['price'], df['average_revenue'], color='purple', alpha=0.7)
-plt.title('Figure 4: Scatter Plot - Price vs Average Revenue')
-plt.xlabel('Price (USD)')
-plt.ylabel('Average Revenue (USD)')
-plt.tight_layout()
+# Scatter Plot: Rating vs. Price
+plt.figure(figsize=(10, 6))
+plt.scatter(df["price"], df["rating"], c='navy', alpha=0.7)
+plt.title("Rating vs. Price", fontsize=16)
+plt.xlabel("Price", fontsize=12)
+plt.ylabel("Rating", fontsize=12)
+plt.grid(alpha=0.3)
+plt.savefig('Scatter.pdf')
 plt.show()
 
 # 5. Histogram: Distribution of Ratings
 plt.figure(figsize=(8, 6))
-df['rating'].hist(bins=10, color='orange', edgecolor='black')
+df['rating'].hist(bins=[0.5, 1.5, 2.5, 3.5, 4.5, 5.5], color='navy', edgecolor='white')
+for count, edge in zip(counts, edges[:-1]):
+    plt.text(edge + 0.5, count + 50, int(count), ha='center', va='bottom', fontsize=10)
 plt.title('Figure 5: Histogram - Distribution of Ratings')
 plt.xlabel('Rating')
 plt.ylabel('Frequency')
+plt.xticks([1, 2, 3, 4, 5])  # Set ticks at the center of the bars
 plt.tight_layout()
+plt.savefig('Histogram.pdf')
 plt.show()
+
 
 # 6. Pie Chart: Proportion of Lodging Types
 plt.figure(figsize=(8, 6))
-df['type'].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=sns.color_palette('pastel'))
+df['type'].value_counts().plot(kind='pie', autopct='%1.1f%%', startangle=90, colors=['skyblue', 'dimgrey'])
 plt.title('Figure 6: Pie Chart - Proportion of Lodging Types')
 plt.ylabel('')
 plt.tight_layout()
+plt.savefig('Pie.pdf')
 plt.show()
 
 # 7. Heat Map: Correlation Matrix
 plt.figure(figsize=(8, 6))
 corr = df[numerical_cols].corr()
-sns.heatmap(corr, annot=True, cmap='coolwarm', fmt='.2f')
+sns.heatmap(corr, annot=True, cmap='cividis', fmt='.2f')
 plt.title('Figure 7: Heat Map - Correlation Matrix of Numerical Features')
 plt.tight_layout()
+plt.savefig('Heatmap.pdf')
 plt.show()
